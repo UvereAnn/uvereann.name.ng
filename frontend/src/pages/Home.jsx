@@ -5,13 +5,16 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 
 const stack = [
-  { label: 'Docker',          color: 'accent' },
+  { label: 'Docker',          color: 'purple' },
   { label: 'GitHub Actions',  color: 'accent' },
+  { label: 'Jenkins',         color: 'purple' },
+  { label: 'Argo CD',         color: 'accent' },
   { label: 'Node.js',         color: 'purple' },
-  { label: 'React',           color: 'purple' },
-  { label: 'Nginx',           color: 'accent' },
-  { label: 'GCP',             color: 'purple' },
-  { label: 'Terraform',       color: 'accent' },
+  { label: 'React',           color: 'accent' },
+  { label: 'Nginx',           color: 'purple' },
+  { label: 'GCP',             color: 'accent' },
+  { label: 'Terraform',       color: 'purple' },
+  { label: 'Ansible',         color: 'accent' },
   { label: 'Linux',           color: 'purple' },
   { label: 'SQLite',          color: 'accent' },
   { label: 'Trivy',           color: 'purple' },

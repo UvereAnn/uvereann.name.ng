@@ -3,16 +3,16 @@
 @tailwind utilities;
 
 :root {
-  --bg:        #0a0a0f;
-  --surface:   #111118;
-  --surface2:  #1a1a24;
-  --border:    #2a2a38;
-  --accent:    #6ee7b7;
-  --accent2:   #818cf8;
-  --warn:      #fbbf24;
-  --danger:    #f87171;
-  --text:      #e2e8f0;
-  --muted:     #64748b;
+  --bg:        #FAF8F5;
+  --surface:   #F3EFE9;
+  --surface2:  #E8E2D9;
+  --border:    #D4CBC0;
+  --accent:    #C47F6E;
+  --accent2:   #4A6FA5;
+  --warn:      #C8921A;
+  --danger:    #C0504A;
+  --text:      #2D3748;
+  --muted:     #7A7062;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -189,3 +189,4 @@ pre {
 }
 .input:focus { border-color: var(--accent); }
 .input::placeholder { color: var(--muted); }
+

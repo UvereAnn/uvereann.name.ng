@@ -31,7 +31,7 @@ export default function Navbar() {
               fontSize: '1.1rem',
               color: 'var(--accent)'
             }}>
-              uverean<span style={{ color: 'var(--muted)' }}>.ng</span>
+              uvereann.name<span style={{ color: 'var(--muted)' }}>.ng</span>
             </span>
           </Link>
 
@@ -72,7 +72,7 @@ export default function Navbar() {
             className="mobile-menu-btn"
             style={{
               background: 'none', border: 'none', cursor: 'pointer',
-              color: 'var(--text)', padding: 8, display: 'none'
+              color: 'var(--bg)', padding: 8, display: 'none'
             }}
             aria-label="Toggle menu"
           >
@@ -91,7 +91,7 @@ export default function Navbar() {
                 onClick={() => setOpen(false)}
                 style={{
                   display: 'block', padding: '10px 4px',
-                  textDecoration: 'none', color: 'var(--text)',
+                  textDecoration: 'none', color: 'var(--bg)',
                   fontSize: '0.9rem', fontWeight: 500
                 }}>
                 {label}
