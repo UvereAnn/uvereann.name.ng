@@ -25,3 +25,9 @@ yarn-debug.log*
 # OS Files
 .DS_Store
 
+# Database
+*.db
+*.db-shm
+*.db-wal
+*.db-journal
+backend/data/
