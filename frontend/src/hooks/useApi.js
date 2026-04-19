@@ -44,7 +44,7 @@ export function useApi(url) {
     // (prevents "update on unmounted component" warnings)
     const controller = new AbortController()
 
-    fetch(url, { signal: controller.signal })
+    fetch(`${BASE_URL}${url}`, { signal: controller.signal })
       .then(res => {
         if (!res.ok) {
           throw new Error(`HTTP ${res.status}: ${res.statusText}`)
