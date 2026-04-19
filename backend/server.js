@@ -22,11 +22,11 @@ const PORT = process.env.PORT || 3000
 
 // .listen() starts the HTTP server
 // Node.js will now accept connections on this port
-const server = app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`)
+const server = app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Server running on port ${PORT}`)
   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`)
   console.log(`✅ CORS enabled for: ${process.env.ALLOWED_ORIGIN}`)
-  console.log(`📖 Test the API: http://localhost:${PORT}/health`)
+  console.log(`📖 Test the API: /health`)
 })
 
 /**
