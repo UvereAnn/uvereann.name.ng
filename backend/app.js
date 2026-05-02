@@ -9,6 +9,11 @@
  * Tests import this directly (without starting a server).
  * server.js imports this and calls .listen() on it.
  * This pattern is the standard in Node.js projects.
+ *
+ * CHANGES:
+ * - Added adminRouter import and mount at /api/admin
+ * - Updated CORS to fix "Missing Header" production errors
+ * - Updated 404 availableRoutes to include admin endpoints
  */
 
 const express = require('express')
@@ -16,10 +21,11 @@ const cors = require('cors')
 const morgan = require('morgan')
 
 // Import our route handlers (one file per feature)
-const healthRouter = require('./app/routers/health')
+const healthRouter   = require('./app/routers/health')
 const projectsRouter = require('./app/routers/projects')
-const blogRouter = require('./app/routers/blog')
-const contactRouter = require('./app/routers/contact')
+const blogRouter     = require('./app/routers/blog')
+const contactRouter  = require('./app/routers/contact')
+const adminRouter    = require('./app/routers/admin')
 
 // Import our middleware
 const { apiRateLimiter, contactRateLimiter } = require('./app/middleware/rateLimiter')
@@ -50,12 +56,32 @@ const app = express()
  * This middleware adds response headers that tell the browser:
  * "Yes, requests from ALLOWED_ORIGIN are permitted."
  *
+ * Updated to use a function-based origin check which fixes
+ * the "Missing Header" and "CORS Policy" errors in production.
  * In production: ALLOWED_ORIGIN will be https://uvereann.name.ng
  */
+const allowedOrigin = process.env.ALLOWED_ORIGIN || 'http://localhost:5173'
+
 app.use(cors({
-  origin: process.env.ALLOWED_ORIGIN || 'http://localhost:5173',
-  methods: ['GET', 'POST'],    // only methods we actually use
-  allowedHeaders: ['Content-Type'],
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin) return callback(null, true)
+
+    // Check if the origin matches our variable or is on our domain
+    if (
+      allowedOrigin === '*' ||
+      origin === allowedOrigin ||
+      origin.includes('uvereann.name.ng')
+    ) {
+      callback(null, true)
+    } else {
+      console.warn(`CORS blocked for origin: ${origin}`)
+      callback(new Error('Not allowed by CORS'))
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
   optionsSuccessStatus: 200
 }))
 
@@ -111,13 +137,19 @@ app.use('/api/', apiRateLimiter)
 // - The router then handles the rest of the path
 // ============================================================
 
-app.use('/health', healthRouter)
+app.use('/health',       healthRouter)
 app.use('/api/projects', projectsRouter)
-app.use('/api/blog', blogRouter)
+app.use('/api/blog',     blogRouter)
 
 // Contact form gets a stricter rate limiter
 // WHY: More sensitive endpoint, don't want spam submissions
-app.use('/api/contact', contactRateLimiter, contactRouter)
+app.use('/api/contact',  contactRateLimiter, contactRouter)
+
+// Admin routes — protected by secret key inside adminRouter itself
+// CONCEPT: The auth check lives inside admin.js using router.use().
+// Every route in that file automatically requires the secret.
+// Mounting it here just tells Express "route /api/admin/* there".
+app.use('/api/admin',    adminRouter)
 
 // ============================================================
 // ERROR HANDLING
@@ -135,12 +167,15 @@ app.use((req, res) => {
     error: 'Not Found',
     message: `Route ${req.method} ${req.path} does not exist`,
     availableRoutes: [
-      'GET /health',
-      'GET /api/projects',
-      'GET /api/projects/:id',
-      'GET /api/blog',
-      'GET /api/blog/:id',
-      'POST /api/contact'
+      'GET  /health',
+      'GET  /health/ready',
+      'GET  /api/projects',
+      'GET  /api/projects/:id',
+      'GET  /api/blog',
+      'GET  /api/blog/:id',
+      'POST /api/contact',
+      'GET  /api/admin/messages?secret=YOUR_SECRET',
+      'GET  /api/admin/messages.json?secret=YOUR_SECRET'
     ]
   })
 })
