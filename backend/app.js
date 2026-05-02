@@ -1,7 +1,6 @@
 /**
  * app.js — Express Application
  *
-<<<<<<< Updated upstream
  * CONCEPT: This file creates and configures the Express app.
  * Think of it as setting up the pipeline that every
  * HTTP request flows through.
@@ -10,31 +9,23 @@
  * Tests import this directly (without starting a server).
  * server.js imports this and calls .listen() on it.
  * This pattern is the standard in Node.js projects.
-=======
- * CHANGES FROM ORIGINAL:
- * - Added adminRouter import
- * - Mounted admin routes at /api/admin
- * - Updated 404 availableRoutes list to include admin endpoints
- * Everything else — CORS, body parser, morgan, rate limiter,
- * error handler — is kept exactly as the current version.
->>>>>>> Stashed changes
+ *
+ * CHANGES:
+ * - Added adminRouter import and mount at /api/admin
+ * - Updated CORS to fix "Missing Header" production errors
+ * - Updated 404 availableRoutes to include admin endpoints
  */
 
 const express = require('express')
 const cors = require('cors')
 const morgan = require('morgan')
 
-<<<<<<< Updated upstream
 // Import our route handlers (one file per feature)
-const healthRouter = require('./app/routers/health')
-=======
-// Import our route handlers
 const healthRouter   = require('./app/routers/health')
->>>>>>> Stashed changes
 const projectsRouter = require('./app/routers/projects')
 const blogRouter     = require('./app/routers/blog')
 const contactRouter  = require('./app/routers/contact')
-const adminRouter    = require('./app/routers/admin')   // ← NEW
+const adminRouter    = require('./app/routers/admin')
 
 // Import our middleware
 const { apiRateLimiter, contactRateLimiter } = require('./app/middleware/rateLimiter')
@@ -56,7 +47,6 @@ const app = express()
 // ============================================================
 
 /**
-<<<<<<< Updated upstream
  * 1. CORS — Cross-Origin Resource Sharing
  *
  * CONCEPT: Browsers enforce a security policy called Same-Origin Policy.
@@ -66,16 +56,9 @@ const app = express()
  * This middleware adds response headers that tell the browser:
  * "Yes, requests from ALLOWED_ORIGIN are permitted."
  *
+ * Updated to use a function-based origin check which fixes
+ * the "Missing Header" and "CORS Policy" errors in production.
  * In production: ALLOWED_ORIGIN will be https://uvereann.name.ng
- */
-app.use(cors({
-  origin: process.env.ALLOWED_ORIGIN || 'http://localhost:5173',
-  methods: ['GET', 'POST'],    // only methods we actually use
-  allowedHeaders: ['Content-Type'],
-=======
- * 1. CORS — Updated for Production Reliability
- * This specifically addresses the "Missing Header" and
- * "CORS Policy" errors seen in the browser console.
  */
 const allowedOrigin = process.env.ALLOWED_ORIGIN || 'http://localhost:5173'
 
@@ -99,7 +82,6 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
->>>>>>> Stashed changes
   optionsSuccessStatus: 200
 }))
 
@@ -160,18 +142,14 @@ app.use('/api/projects', projectsRouter)
 app.use('/api/blog',     blogRouter)
 
 // Contact form gets a stricter rate limiter
-<<<<<<< Updated upstream
 // WHY: More sensitive endpoint, don't want spam submissions
-app.use('/api/contact', contactRateLimiter, contactRouter)
-=======
 app.use('/api/contact',  contactRateLimiter, contactRouter)
 
 // Admin routes — protected by secret key inside adminRouter itself
 // CONCEPT: The auth check lives inside admin.js using router.use().
 // Every route in that file automatically requires the secret.
 // Mounting it here just tells Express "route /api/admin/* there".
-app.use('/api/admin',    adminRouter)                  // ← NEW
->>>>>>> Stashed changes
+app.use('/api/admin',    adminRouter)
 
 // ============================================================
 // ERROR HANDLING
@@ -196,8 +174,8 @@ app.use((req, res) => {
       'GET  /api/blog',
       'GET  /api/blog/:id',
       'POST /api/contact',
-      'GET  /api/admin/messages?secret=YOUR_SECRET',       // ← NEW
-      'GET  /api/admin/messages.json?secret=YOUR_SECRET'   // ← NEW
+      'GET  /api/admin/messages?secret=YOUR_SECRET',
+      'GET  /api/admin/messages.json?secret=YOUR_SECRET'
     ]
   })
 })
@@ -216,10 +194,7 @@ app.use((req, res) => {
  * In development we show the full error for debugging.
  */
 app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
-<<<<<<< Updated upstream
   // Always log errors server-side (even in production)
-=======
->>>>>>> Stashed changes
   console.error(`❌ Error on ${req.method} ${req.path}:`, err.message)
 
   const isDev = process.env.NODE_ENV !== 'production'
