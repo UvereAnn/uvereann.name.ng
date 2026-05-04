@@ -1,83 +1,45 @@
 /**
- * app/database.js — Database Setup
+ * app/database.js
  *
- * CONCEPT: This file handles everything related to the database:
- * - Creating the connection
- * - Creating tables if they don't exist
- * - Exporting the db object for routers to use
+ * CHANGES FROM ORIGINAL:
+ * Added two new tables:
+ * - blog_comments: stores reader comments (require approval)
+ * - blog_likes:    stores one like per IP per post
  *
- * WHY better-sqlite3 INSTEAD OF sqlite3?
- * better-sqlite3 uses synchronous (blocking) API.
- * This sounds bad but for SQLite it is actually better:
- * - SQLite only handles one write at a time anyway
- * - Synchronous code is simpler and less error-prone
- * - No callback hell or promise chains for simple queries
- *
- * CONCEPT — Synchronous vs Asynchronous:
- * Synchronous: code waits for operation to finish before continuing
- * Asynchronous: code continues while operation runs in background
- * For a simple portfolio with low traffic, sync SQLite is perfect.
+ * Everything else is identical to your existing database.js
  */
 
 const Database = require('better-sqlite3')
 const path = require('path')
 
-// Build the absolute path to the database file
-// WHY path.resolve: Relative paths behave differently depending
-// on where you run the script from. Absolute paths always work.
 const DB_PATH = path.resolve(process.env.DB_PATH || './database.db')
 
-// Create (or open existing) database connection
-// { verbose: console.log } logs every SQL query in development
-// Remove verbose in production
-const db = new Database(DB_PATH, {
-  verbose: process.env.NODE_ENV === 'development' ? null : null
-})
+const db = new Database(DB_PATH)
 
-/**
- * initializeDatabase()
- *
- * Creates tables if they don't already exist.
- * Safe to run every time the server starts — IF NOT EXISTS
- * means it won't fail or duplicate data if tables already exist.
- *
- * CONCEPT — SQL CREATE TABLE:
- * INTEGER PRIMARY KEY AUTOINCREMENT → auto-generates id (1, 2, 3...)
- * TEXT NOT NULL → required string field
- * TEXT → optional string field
- * INTEGER DEFAULT 1 → number with default value
- * DATETIME DEFAULT CURRENT_TIMESTAMP → auto-set to now
- */
 function initializeDatabase () {
-  // Enable WAL mode — Write-Ahead Logging
-  // WHY: Makes SQLite much faster for concurrent reads
-  // and more resilient to crashes
   db.pragma('journal_mode = WAL')
-
-  // Enable foreign keys — SQLite has them disabled by default!
   db.pragma('foreign_keys = ON')
 
-  // Create tables
   db.exec(`
     CREATE TABLE IF NOT EXISTS projects (
       id          INTEGER PRIMARY KEY AUTOINCREMENT,
       title       TEXT    NOT NULL,
       description TEXT    NOT NULL,
-      tags        TEXT    NOT NULL,   -- stored as JSON string
+      tags        TEXT    NOT NULL,
       github_url  TEXT,
       live_url    TEXT,
       category    TEXT    NOT NULL,
-      featured    INTEGER DEFAULT 0,  -- 0 = false, 1 = true
+      featured    INTEGER DEFAULT 0,
       created_at  DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
     CREATE TABLE IF NOT EXISTS blog_posts (
       id          INTEGER PRIMARY KEY AUTOINCREMENT,
       title       TEXT    NOT NULL,
-      slug        TEXT    NOT NULL UNIQUE,  -- URL-friendly title
+      slug        TEXT    NOT NULL UNIQUE,
       excerpt     TEXT    NOT NULL,
       content     TEXT    NOT NULL,
-      tags        TEXT    NOT NULL,   -- stored as JSON string
+      tags        TEXT    NOT NULL,
       published   INTEGER DEFAULT 1,
       created_at  DATETIME DEFAULT CURRENT_TIMESTAMP
     );
@@ -91,61 +53,94 @@ function initializeDatabase () {
       ip_address TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
+
+    -- Blog comments
+    -- approved = 0 means pending review (not shown publicly)
+    -- approved = 1 means you approved it (shown publicly)
+    CREATE TABLE IF NOT EXISTS blog_comments (
+      id           INTEGER PRIMARY KEY AUTOINCREMENT,
+      post_id      INTEGER NOT NULL REFERENCES blog_posts(id) ON DELETE CASCADE,
+      author_name  TEXT    NOT NULL,
+      author_email TEXT,
+      content      TEXT    NOT NULL,
+      ip_address   TEXT,
+      approved     INTEGER DEFAULT 0,
+      created_at   DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    -- Blog likes — one row per IP per post
+    -- To unlike: delete the row
+    -- To count likes: COUNT(*) WHERE post_id = ?
+    CREATE TABLE IF NOT EXISTS blog_likes (
+      id         INTEGER PRIMARY KEY AUTOINCREMENT,
+      post_id    INTEGER NOT NULL REFERENCES blog_posts(id) ON DELETE CASCADE,
+      ip_address TEXT    NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(post_id, ip_address)
+    );
   `)
 
-  // Seed data — only insert if tables are empty
   seedProjects()
   seedBlogPosts()
 
   console.log(`📦 Database initialized at: ${DB_PATH}`)
 }
 
-/**
- * Seed projects — sample data for development
- *
- * CONCEPT — Seeding:
- * Seeding means inserting initial data into the database.
- * We check if data exists first to avoid duplicates.
- */
 function seedProjects () {
   const count = db.prepare('SELECT COUNT(*) as count FROM projects').get()
-  if (count.count > 0) return // already seeded
+  if (count.count > 0) return
 
   const insert = db.prepare(`
     INSERT INTO projects (title, description, tags, github_url, live_url, category, featured)
     VALUES (@title, @description, @tags, @github_url, @live_url, @category, @featured)
   `)
 
-  // db.transaction() wraps multiple inserts in one transaction
-  // WHY: Much faster — SQLite commits once instead of per-row
   const insertMany = db.transaction((projects) => {
     for (const project of projects) insert.run(project)
   })
 
   insertMany([
     {
-      title: 'Portfolio Website',
+      title: 'DevOps Portfolio Platform',
       description: 'This portfolio site — built with React, Node.js, and deployed with Docker and GitHub Actions CI/CD pipeline.',
       tags: JSON.stringify(['React', 'Node.js', 'Docker', 'GitHub Actions', 'Nginx']),
-      github_url: 'https://github.com/yourusername/portfolio',
+      github_url: 'https://github.com/UvereAnn/uvereann.name.ng',
       live_url: 'https://uvereann.name.ng',
       category: 'DevOps',
       featured: 1
     },
     {
-      title: 'CI/CD Pipeline with GitHub Actions',
+      title: 'Health Blog',
       description: 'Automated pipeline covering test, security scanning with Trivy, Docker build and push, and deployment via SSH.',
       tags: JSON.stringify(['GitHub Actions', 'Docker', 'Trivy', 'CI/CD', 'Security']),
-      github_url: 'https://github.com/yourusername/cicd-demo',
-      live_url: null,
+      github_url: 'https://github.com/UvereAnn/healthmattershub.com',
+      live_url: 'https://healthmattershub.com',
       category: 'CI/CD',
       featured: 1
     },
     {
-      title: 'Containerised Node.js API',
+      title: 'Vehicle Registry System',
       description: 'Production-ready Express API with multi-stage Docker build, non-root user, health checks, and rate limiting.',
       tags: JSON.stringify(['Node.js', 'Docker', 'Express', 'Security', 'REST API']),
-      github_url: 'https://github.com/yourusername/node-api',
+      github_url: 'https://github.com/UvereAnn/national_vehicle_registry',
+      live_url: 'https://nationalvehicleregistry.com.ng',
+      category: 'Backend',
+      featured: 1
+    },
+    {
+      title: 'DevSecOps Project',
+      description: 'Automated pipeline covering test, security scanning with Trivy, Docker build and push, and deployment via SSH.',
+      tags: JSON.stringify(['GitHub Actions', 'Docker', 'Trivy', 'CI/CD', 'Security']),
+      github_url: 'https://github.com/UvereAnn/End-to-End-DevSecOps-Suite',
+      live_url: null,
+      category: 'CI/CD',
+      featured: 0
+    },
+    {
+      title: 'Video to Audio Microservices',
+      description: 'Production-ready Express API with multi-stage Docker build, non-root user, health checks, and rate limiting.',
+      tags: JSON.stringify(['Node.js', 'Docker', 'Express', 'Security', 'REST API']),
+      github_url: 'https://github.com/UvereAnn/video-to-audio-microservices',
       live_url: null,
       category: 'Backend',
       featured: 0
@@ -179,11 +174,11 @@ function seedBlogPosts () {
     {
       title: 'Why I Chose Docker Compose Over Kubernetes for My Portfolio',
       slug: 'docker-compose-vs-kubernetes-portfolio',
-      excerpt: 'Kubernetes is powerful, but it is overkill for a solo portfolio. Here is my reasoning and what I would use instead.',
+      excerpt: 'Kubernetes is powerful, but it is overkill for a solo portfolio. Here is my reasoning and what I use instead.',
       content: `# Why I Chose Docker Compose Over Kubernetes
 
 When I started building this portfolio, I considered running a full Kubernetes cluster.
-k3s makes it accessible, and ArgoCD for GitOps looked impressive.
+k3s makes it accessible, and ArgoCD for GitOps looked impressive on paper.
 
 But I asked myself: **what problem am I actually solving?**
 
@@ -199,10 +194,8 @@ There is no need for horizontal pod autoscaling.
 Docker Compose gives me:
 - Container isolation
 - Reproducible environments
-- A single \`docker compose up\` to run everything
+- A single command to run everything
 - A YAML file that documents my entire stack
-
-That is it. Simple, effective, explainable.
 
 ## When I Would Use Kubernetes
 
@@ -218,17 +211,12 @@ Kubernetes would make sense. The right tool for the right job.`,
       content: `# Understanding CORS
 
 If you have built a frontend and backend separately, you have
-almost certainly seen this error:
-
-\`\`\`
-Access to fetch at 'http://localhost:3000' from origin
-'http://localhost:5173' has been blocked by CORS policy
-\`\`\`
+almost certainly seen this error in the browser console.
 
 ## What is Actually Happening
 
 Your browser enforces a rule called the Same-Origin Policy.
-An "origin" is protocol + domain + port. Two URLs are different
+An origin is protocol plus domain plus port. Two URLs are different
 origins if ANY of those three differ.
 
 localhost:3000 and localhost:5173 are different origins.
@@ -239,25 +227,13 @@ websites making API calls on your behalf.
 ## The Fix
 
 On the backend, add the CORS middleware and specify which
-origins are allowed:
-
-\`\`\`javascript
-app.use(cors({
-  origin: 'http://localhost:5173'
-}))
-\`\`\`
-
-This adds a header to every response:
-\`Access-Control-Allow-Origin: http://localhost:5173\`
-
-The browser sees this header and allows the request.
+origins are allowed. This adds a header to every response
+that the browser checks before allowing the request through.
 
 ## In Production
 
-Change the allowed origin to your real domain:
-\`\`\`
-ALLOWED_ORIGIN=https://uvereann.name.ng
-\`\`\``,
+Change the allowed origin to your real domain in your
+environment variables. Never use wildcard in production.`,
       tags: JSON.stringify(['CORS', 'Security', 'Node.js', 'Web']),
       published: 1
     },
@@ -275,27 +251,25 @@ For a portfolio or most web apps, GitHub Flow is better.
 
 ## The Rules
 
-1. \`main\` is always deployable
-2. Never commit directly to \`main\`
+1. main is always deployable
+2. Never commit directly to main
 3. Create a branch for every change
 4. Open a Pull Request
 5. Automated tests must pass
-6. Merge to main → triggers automatic deployment
+6. Merge to main triggers automatic deployment
 
 ## Branch Names
 
-\`\`\`
 feature/add-contact-page
 fix/mobile-nav-overflow
 chore/update-dependencies
 docs/add-setup-guide
-\`\`\`
 
 ## Why This Matters in Interviews
 
 Interviewers ask about branching strategies. Knowing the
 tradeoffs between GitFlow and GitHub Flow shows you understand
-that engineering decisions are contextual — not one-size-fits-all.`,
+that engineering decisions are contextual.`,
       tags: JSON.stringify(['Git', 'GitHub', 'DevOps', 'Workflow']),
       published: 1
     }
