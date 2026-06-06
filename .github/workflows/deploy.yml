@@ -1,0 +1,111 @@
+# .github/workflows/deploy.yml — Continuous Deployment
+#
+# CONCEPT: This workflow runs automatically when code is
+# merged to main. It SSHs into your Oracle VM, pulls
+# the latest code, reinstalls dependencies, rebuilds
+# the frontend, and restarts the backend.
+#
+# This is called Continuous Deployment (CD).
+# Combined with the CI workflow (tests + security scan),
+# you have a full CI/CD pipeline.
+#
+# FLOW:
+# Developer merges PR to main
+#   → GitHub Actions triggers this workflow
+#   → SSHs into Oracle VM
+#   → Pulls latest code from GitHub
+#   → Rebuilds frontend
+#   → Restarts backend via PM2
+#   → Verifies site is healthy
+#   → Reports success or failure
+
+name: Deploy to Oracle Cloud
+
+on:
+  push:
+    branches: [main]
+  # Only deploy when code reaches main
+  # Feature branches only run CI (tests + scan)
+  # not deployment
+
+jobs:
+  deploy:
+    name: Deploy to Oracle VM
+    runs-on: ubuntu-latest
+    # runs-on: the GitHub-hosted machine that runs the job
+    # ubuntu-latest = a fresh Ubuntu VM spun up by GitHub
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        # Downloads your repository onto the GitHub runner
+        # Needed so we can verify files before deploying
+
+      - name: Deploy to Oracle VM via SSH
+        uses: appleboy/ssh-action@v1
+        # appleboy/ssh-action is a popular GitHub Action
+        # that handles SSH connections cleanly
+        with:
+          host: ${{ secrets.OCI_VM_HOST }}
+          username: ${{ secrets.OCI_VM_USER }}
+          key: ${{ secrets.OCI_SSH_PRIVATE_KEY }}
+          # Secrets are stored in GitHub — never in code
+          # Settings → Secrets and variables → Actions
+
+          script: |
+            set -e
+            # set -e means exit immediately if any command fails
+            # Without this, the script continues even after errors
+
+            echo "🚀 Starting deployment..."
+
+            # Navigate to app directory
+            cd /srv/portfolio
+
+            # Pull latest code from GitHub
+            git pull origin main
+            echo "✅ Code updated"
+
+            # Install backend dependencies
+            # (in case new packages were added)
+            cd backend
+            npm ci --only=production
+            cd ..
+            echo "✅ Backend dependencies installed"
+
+            # Rebuild React frontend
+            cd frontend
+            npm ci
+            npm run build
+            cd ..
+            echo "✅ Frontend rebuilt"
+
+            # Fix ownership after git pull
+            sudo chown -R deploy:deploy /srv/portfolio
+
+            # Restart backend with PM2
+            # reload = zero-downtime restart
+            # (new process starts before old one stops)
+            pm2 reload portfolio-backend
+            echo "✅ Backend restarted"
+
+            # Wait for backend to be ready
+            sleep 3
+
+            # Health check — verify deployment succeeded
+            response=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/health)
+            if [ "$response" = "200" ]; then
+              echo "✅ Health check passed — deployment successful"
+            else
+              echo "❌ Health check failed — HTTP $response"
+              exit 1
+            fi
+
+      - name: Notify deployment status
+        if: always()
+        run: |
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "✅ Deployment to uvereann.name.ng succeeded"
+          else
+            echo "❌ Deployment failed — check logs above"
+          fi
