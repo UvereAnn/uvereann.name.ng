@@ -24,6 +24,13 @@ initializeDatabase()
 
 const app = express()
 
+// Tell Express it is behind a reverse proxy (Nginx)
+// This fixes two things:
+// 1. Rate limiter can correctly identify client IPs
+//    from the X-Forwarded-For header Nginx sends
+// 2. req.ip returns the real client IP, not 127.0.0.1
+app.set('trust proxy', 1)
+
 // ── Middleware ────────────────────────────────────────────────
 
 const allowedOrigin = process.env.ALLOWED_ORIGIN || 'http://localhost:5173'
