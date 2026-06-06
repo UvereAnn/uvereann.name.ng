@@ -1,0 +1,63 @@
+# roles/common/tasks/main.yml
+#
+# CONCEPT: This role runs first on every server.
+# It ensures the system is up to date and has the
+# basic tools every other role depends on.
+
+---
+- name: Update apt package cache
+  apt:
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Upgrade all packages
+  apt:
+    upgrade: dist
+
+# =========================================================================
+# THE ATOMIC RESET: Completely drop system firewall blocks
+# =========================================================================
+- name: Clear conflicting firewall configurations and purge blockers
+  ansible.builtin.shell: |
+    export DEBIAN_FRONTEND=noninteractive
+    # Disable and purge UFW completely so it stops blocking local ports
+    ufw disable || true
+    apt-get purge -y ufw iptables-persistent netfilter-persistent || true
+    
+    # Flush all hidden underlying rule chains to completely open the OS layer
+    iptables -F
+    iptables -X
+    iptables -P INPUT ACCEPT
+    iptables -P FORWARD ACCEPT
+    iptables -P OUTPUT ACCEPT
+    
+    # Reinstall essential base utilities smoothly
+    dpkg --configure -a
+    apt-get install -f -y
+    apt-get install -y curl wget git unzip build-essential software-properties-common fail2ban
+  become: true
+
+- name: Set timezone to UTC
+  timezone:
+    name: UTC
+
+- name: Create deploy user
+  user:
+    name: deploy
+    shell: /bin/bash
+    create_home: true
+    groups: sudo
+    append: true
+
+- name: Add SSH key to deploy user
+  authorized_key:
+    user: deploy
+    key: "{{ lookup('file', '~/.ssh/oracle_vm_key.pub') }}"
+    state: present
+
+- name: Allow deploy user passwordless sudo
+  lineinfile:
+    path: /etc/sudoers.d/deploy
+    line: "deploy ALL=(ALL) NOPASSWD:ALL"
+    create: true
+    validate: "visudo -cf %s"

@@ -1,0 +1,59 @@
+# roles/pm2/tasks/main.yml
+#
+# CONCEPT: PM2 is a process manager for Node.js.
+# Without it, if your Node.js server crashes or the VM reboots,
+# your backend goes offline and stays offline until you
+# manually restart it.
+#
+# PM2 solves this by:
+# - Automatically restarting the app if it crashes
+# - Starting the app automatically when the server reboots
+# - Providing logs, monitoring, and process management
+#
+# Think of PM2 as the equivalent of systemd for Node.js apps.
+# In a Docker setup, Docker handles restarts with
+# 'restart: unless-stopped'. Here PM2 does the same job.
+
+---
+- name: Install PM2 globally
+  npm:
+    name: pm2
+    global: true
+    # global: true installs to /usr/local/bin
+    # Available to all users on the system
+
+# Grouping deploy-user tasks with correct sudo flags
+- name: Manage PM2 Application as Deploy User
+  become: true
+  become_user: deploy
+  become_method: sudo        # <-- Changed back to sudo
+  become_flags: -i           # <-- ADD THIS (Simulates a clean login shell)
+  environment:
+    HOME: /home/deploy
+  block:
+    - name: Check if PM2 is already running portfolio-backend
+      command: pm2 describe portfolio-backend
+      register: pm2_status
+      failed_when: false
+      changed_when: false
+
+    - name: Start backend with PM2
+      command: pm2 start {{ app_dir }}/backend/server.js --name portfolio-backend
+      environment:
+        NODE_ENV: production
+      when: pm2_status.rc != 0
+
+    - name: Save PM2 process list
+      command: pm2 save
+
+# Root tasks continue out here
+- name: Generate PM2 startup script
+  command: pm2 startup systemd -u deploy --hp /home/deploy
+  register: pm2_startup
+
+- name: Enable PM2 systemd service
+  systemd:
+    name: pm2-deploy
+    enabled: true
+    daemon_reload: true
+  failed_when: false

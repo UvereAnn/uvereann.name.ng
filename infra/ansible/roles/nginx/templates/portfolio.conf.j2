@@ -1,0 +1,69 @@
+# portfolio.conf.j2 — Nginx configuration for uvereann.name.ng
+#
+# CONCEPT: This is an HTTP-only config initially.
+# After Certbot runs and gets the SSL certificate,
+# it automatically modifies this file to add HTTPS.
+# We start with HTTP and let Certbot handle the upgrade.
+
+server {
+    listen 80;
+    server_name {{ domain_name }};
+
+    # Document root — where React build files live
+    root {{ app_dir }}/frontend/dist;
+    index index.html;
+
+    # Security headers
+    # These tell browsers how to handle your content securely
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+
+    # Serve React SPA
+    # CONCEPT: try_files checks if the file exists on disk.
+    # If not, it falls back to index.html and lets React Router
+    # handle the URL. This is what makes page refresh work
+    # on routes like /projects or /about.
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # Cache static assets aggressively
+    # JS and CSS files have hashed names so they never conflict
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+
+    # Proxy API requests to Node.js backend
+    # CONCEPT: Any request starting with /api/ gets forwarded
+    # to your Express server on port 3000.
+    # The browser never knows the backend is on a different port.
+    location /api/ {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+    # Proxy health check endpoint
+    location /health {
+        proxy_pass http://localhost:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    # Admin panel proxy
+    location /api/admin/ {
+        proxy_pass http://localhost:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}

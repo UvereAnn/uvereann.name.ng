@@ -1,0 +1,29 @@
+# playbook.yml — Master Playbook
+#
+# CONCEPT: A playbook defines WHAT to do and WHERE to do it.
+# 'hosts: portfolio' means run on the servers in the
+# [portfolio] group from inventory.ini
+#
+# 'become: true' means use sudo for tasks that need it
+# (installing packages, writing to system directories)
+#
+# Roles run in order — each one builds on the previous.
+# common must run before node, node before app, etc.
+
+---
+- name: Configure uvereann portfolio server
+  hosts: portfolio
+  become: true
+
+  vars_files:
+    - vars.yml
+    # vars.yml contains your app secrets (gitignored)
+    # Same concept as .env — keeps secrets out of code
+
+  roles:
+    - common     # system update, essential tools, deploy user
+    - node       # install Node.js 20
+    - app        # clone repo, install deps, build frontend
+    - pm2        # process manager — keeps Node.js running
+    - nginx      # reverse proxy + serve React files
+    - certbot    # HTTPS with Let's Encrypt

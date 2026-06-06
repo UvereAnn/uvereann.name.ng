@@ -1,0 +1,44 @@
+# roles/node/tasks/main.yml
+#
+# CONCEPT: We install Node.js using NodeSource's official
+# repository rather than Ubuntu's default repos.
+# Ubuntu's default Node.js is often outdated (v12 or v16).
+# We need v20 LTS to match our development environment.
+#
+# This is the same as using nvm locally but for a server
+# we use the NodeSource repo for system-wide installation.
+
+---
+- name: Download NodeSource setup script for Node.js 20
+  get_url:
+    url: https://deb.nodesource.com/setup_20.x
+    dest: /tmp/nodesource_setup.sh
+    mode: "0755"
+
+- name: Run NodeSource setup script
+  command: bash /tmp/nodesource_setup.sh
+  # This adds the NodeSource apt repository to the system
+
+- name: Install Node.js 20
+  apt:
+    name: nodejs
+    state: present
+    update_cache: true
+
+- name: Verify Node.js version
+  command: node --version
+  register: node_version
+  # register saves the output to a variable
+
+- name: Display Node.js version
+  debug:
+    msg: "Node.js installed: {{ node_version.stdout }}"
+  # debug prints to Ansible output so you can verify
+
+- name: Verify npm version
+  command: npm --version
+  register: npm_version
+
+- name: Display npm version
+  debug:
+    msg: "npm installed: {{ npm_version.stdout }}"

@@ -1,0 +1,58 @@
+# roles/certbot/tasks/main.yml
+#
+# CONCEPT: Certbot is the official Let's Encrypt client.
+# Let's Encrypt is a free, automated certificate authority.
+# Before Certbot existed, SSL certificates cost $100+/year.
+#
+# How it works:
+# 1. Certbot contacts Let's Encrypt servers
+# 2. Let's Encrypt says "prove you own uvereann.name.ng"
+# 3. Certbot creates a temporary file on your server
+# 4. Let's Encrypt visits your domain and checks for the file
+# 5. Proof confirmed — certificate issued
+# 6. Certificate valid for 90 days, auto-renewed by cron job
+#
+# IMPORTANT: DNS must be pointing to this VM's IP BEFORE
+# running Certbot. Let's Encrypt needs to reach your domain.
+
+---
+- name: Install Certbot and Nginx plugin
+  apt:
+    name:
+      - certbot
+      - python3-certbot-nginx
+    state: present
+
+- name: Obtain SSL certificate
+  command: >
+    certbot --nginx
+    -d {{ domain_name }}
+    --non-interactive
+    --agree-tos
+    --email {{ certbot_email }}
+    --redirect
+  # --nginx: use the Nginx plugin (modifies nginx config automatically)
+  # --non-interactive: no prompts (required for automation)
+  # --agree-tos: agree to Let's Encrypt terms of service
+  # --redirect: automatically redirect HTTP to HTTPS
+  args:
+    creates: /etc/letsencrypt/live/{{ domain_name }}/fullchain.pem
+  # creates: only run if this file does not exist
+  # Prevents re-requesting certificate on every Ansible run
+  # Let's Encrypt has rate limits — too many requests = blocked
+
+- name: Verify certificate auto-renewal works
+  command: certbot renew --dry-run
+  # --dry-run tests the renewal process without actually renewing
+  # Confirms the cron job will work when the cert expires in 90 days
+
+- name: Ensure certbot renewal cron job exists
+  cron:
+    name: certbot-renewal
+    job: "certbot renew --quiet"
+    hour: "3"
+    minute: "0"
+    weekday: "1"
+  # Runs every Monday at 3am
+  # Certbot only renews if expiry is within 30 days
+  # --quiet suppresses output unless there is an error
