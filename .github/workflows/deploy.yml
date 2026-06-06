@@ -54,48 +54,41 @@ jobs:
 
           script: |
             set -e
-            # set -e means exit immediately if any command fails
-            # Without this, the script continues even after errors
-
             echo "🚀 Starting deployment..."
 
-            # Navigate to app directory
             cd /srv/portfolio
 
-            # Pull latest code from GitHub
+            # Pull latest code
             git pull origin main
             echo "✅ Code updated"
 
+            # Fix ownership before doing anything
+            sudo chown -R deploy:deploy /srv/portfolio
+
             # Install backend dependencies
-            # (in case new packages were added)
             cd backend
             npm ci --only=production
             cd ..
             echo "✅ Backend dependencies installed"
 
-            # Rebuild React frontend
+            # Clean old frontend build then rebuild
+            rm -rf frontend/dist
             cd frontend
             npm ci
             npm run build
             cd ..
             echo "✅ Frontend rebuilt"
 
-            # Fix ownership after git pull
-            sudo chown -R deploy:deploy /srv/portfolio
-
-            # Restart backend with PM2
-            # reload = zero-downtime restart
-            # (new process starts before old one stops)
+            # Reload backend
             pm2 reload portfolio-backend
             echo "✅ Backend restarted"
 
-            # Wait for backend to be ready
             sleep 3
 
-            # Health check — verify deployment succeeded
+            # Health check
             response=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/health)
             if [ "$response" = "200" ]; then
-              echo "✅ Health check passed — deployment successful"
+              echo "✅ Health check passed"
             else
               echo "❌ Health check failed — HTTP $response"
               exit 1
