@@ -1,0 +1,13 @@
+# handlers/main.yml
+#
+# CONCEPT: Handlers run only when notified by a task.
+# They run once at the END of the play even if notified
+# multiple times. This prevents Nginx from reloading
+# after every single config change when you have multiple
+# tasks that modify config files.
+
+---
+- name: reload nginx
+  systemd:
+    name: nginx
+    state: reloaded

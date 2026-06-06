@@ -1,0 +1,64 @@
+# roles/app/tasks/main.yml
+#
+# CONCEPT: This role deploys your actual application code.
+# It clones from GitHub, creates the .env file with secrets
+# from vars.yml, installs npm dependencies, and builds
+# the React frontend into static files.
+#
+# The app directory is /srv/portfolio
+# /srv is the standard Linux directory for served data
+
+---
+- name: Create app directory
+  file:
+    path: "{{ app_dir }}"
+    state: directory
+    owner: deploy
+    group: deploy
+    mode: "0755"
+
+- name: Mark app directory as safe for git
+  command: git config --global --add safe.directory {{ app_dir }}
+  # Git 2.35+ added a security check that blocks operations
+  # in directories owned by a different user.
+  # This tells git to trust /srv/portfolio regardless of owner.
+
+- name: Clone repository from GitHub
+  git:
+    repo: "{{ repo_url }}"
+    dest: "{{ app_dir }}"
+    version: main
+    force: true
+  # Run as root, fix ownership after
+
+- name: Fix app directory ownership
+  file:
+    path: "{{ app_dir }}"
+    owner: deploy
+    group: deploy
+    recurse: true
+  # recurse: true applies ownership to all files inside
+
+- name: Create backend .env file
+  template:
+    src: env.j2
+    dest: "{{ app_dir }}/backend/.env"
+    owner: deploy
+    group: deploy
+    mode: "0600"
+
+- name: Install backend dependencies
+  npm:
+    path: "{{ app_dir }}/backend"
+    production: true
+
+- name: Install frontend dependencies
+  npm:
+    path: "{{ app_dir }}/frontend"
+
+- name: Build React frontend
+  command: npm run build
+  args:
+    chdir: "{{ app_dir }}/frontend"
+  environment:
+    VITE_API_URL: ""

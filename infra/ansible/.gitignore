@@ -1,0 +1,5 @@
+# Secret variables — treat like .env
+vars.yml
+
+# Ansible retry files created on failed runs
+*.retry
