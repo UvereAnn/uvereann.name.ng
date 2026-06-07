@@ -292,21 +292,6 @@ Deploy Job
     └── HTTP 200 OK
 ```
 
----
-
-## Documentation
-
-| File | Contents |
-|------|----------|
-| `docs/00-CONCEPTS.md` | Foundational concepts — read before touching code |
-| `docs/COMPLETE-GUIDE.md` | Full setup guide: local → GitHub → Docker → OCI |
-| `docs/INTERVIEW-QUESTIONS.md` | 25 Q&A pairs for interview preparation |
-| `docs/PROJECT-SUMMARY.md` | Architecture decisions and build story |
-| `infra/terraform/` | Terraform files for OCI infrastructure |
-| `infra/ansible/` | Ansible playbooks and roles |
-
----
-
 ## Security
 
 - Non-root `deploy` user runs the application
