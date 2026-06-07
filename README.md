@@ -9,33 +9,75 @@ practice demonstrated here is used to build and run the site itself.
 
 ## Architecture
 
+```mermaid
+flowchart TD
+
+A[Developer Machine]
+
+A --> B[Git Push]
+B --> C[Feature Branch]
+C --> D[Pull Request]
+
+D --> E[GitHub Repository]
+
+E --> F[CI Pipeline]
+F --> F1[Jest Backend Tests]
+F --> F2[ESLint Frontend]
+F --> F3[Trivy Security Scan]
+
+E --> G[CD Pipeline]
+G --> H[SSH Deployment]
+
+H --> I[Oracle Cloud VM<br/>VM.Standard.E2.1.Micro]
+
+I --> J[Nginx Reverse Proxy]
+J --> K[React Frontend]
+J --> L[Node.js Express API]
+
+L --> M[SQLite Database]
+
+I --> N[PM2 Process Manager]
+I --> O[Let's Encrypt SSL]
+```
+
+## 🏗️ Architecture
+
+```text
 Developer Machine
 │
-│ git push → feature branch → Pull Request
-▼
-GitHub
+├── Git Push
 │
-├── CI Pipeline (every PR)
-│     ├── Jest tests (backend)
-│     ├── ESLint (frontend)
-│     └── Trivy security scan
+├── Feature Branch
 │
-└── CD Pipeline (merge to main)
+└── Pull Request
+    │
+    ▼
+GitHub Repository
 │
-│ SSH deploy
-▼
-Oracle Cloud Infrastructure
-VM.Standard.E2.1.Micro — Always Free
-uk-london-1 — 145.241.215.190
+├── CI Pipeline
+│   ├── Jest Backend Tests
+│   ├── ESLint Frontend
+│   └── Trivy Security Scan
 │
-├── Nginx (reverse proxy + HTTPS)
-│     ├── / → serves React build files
-│     └── /api → proxies to Node.js:3000
+└── CD Pipeline
+    │
+    └── SSH Deployment
+        │
+        ▼
+Oracle Cloud VM
+(VM.Standard.E2.1.Micro)
 │
-├── Node.js/Express (PM2 process manager)
-│     └── SQLite database
+├── Nginx Reverse Proxy
+│   ├── React Frontend (/)
+│   └── Node.js API (/api)
 │
-└── Let's Encrypt SSL certificate
+├── Node.js / Express
+│   └── SQLite Database
+│
+├── PM2 Process Manager
+│
+└── Let's Encrypt SSL
+```
 
 ---
 
@@ -108,48 +150,147 @@ GET  /api/admin/likes?secret=             view like counts (protected)
 
 ## Infrastructure
 
-Provisioned with Terraform — see `infra/terraform/`
-Oracle Cloud — uk-london-1
-├── VCN: 10.0.0.0/16
-├── Public Subnet: 10.0.1.0/24
-├── Internet Gateway
-├── Security List: ports 22, 80, 443
-├── VM.Standard.E2.1.Micro (1 OCPU, 1GB RAM)
-│     Ubuntu 24.04 — Always Free
-└── Reserved Public IP: 145.241.215.190
+```mermaid
+flowchart TD
 
-Configured with Ansible — see `infra/ansible/`
-Roles:
-├── common   — system update, UFW firewall, deploy user
-├── node     — Node.js 20 via NodeSource
-├── app      — clone repo, .env, npm install, build frontend
-├── pm2      — process manager, auto-start on reboot
-├── nginx    — reverse proxy, static file serving
-└── certbot  — Let's Encrypt SSL, auto-renewal
+A[Terraform]
+
+A --> B[Oracle Cloud<br/>uk-london-1]
+
+B --> C[VCN<br/>10.0.0.0/16]
+B --> D[Public Subnet<br/>10.0.1.0/24]
+B --> E[Internet Gateway]
+B --> F[Security List]
+B --> G[VM.Standard.E2.1.Micro]
+B --> H[Reserved Public IP]
+
+G --> I[Ubuntu 24.04]
+
+J[Ansible]
+
+J --> J1[common]
+J --> J2[node]
+J --> J3[app]
+J --> J4[pm2]
+J --> J5[nginx]
+J --> J6[certbot]
+```
+
+## ☁️ Infrastructure
+
+```text
+Terraform (infra/terraform/)
+│
+└── Oracle Cloud (uk-london-1)
+    │
+    ├── VCN
+    │   └── 10.0.0.0/16
+    │
+    ├── Public Subnet
+    │   └── 10.0.1.0/24
+    │
+    ├── Internet Gateway
+    │
+    ├── Security List
+    │   ├── Port 22 (SSH)
+    │   ├── Port 80 (HTTP)
+    │   └── Port 443 (HTTPS)
+    │
+    ├── VM.Standard.E2.1.Micro
+    │   ├── Ubuntu 24.04
+    │   ├── 1 OCPU
+    │   ├── 1 GB RAM
+    │   └── Always Free
+    │
+    └── Reserved Public IP
+
+Ansible (infra/ansible/)
+│
+├── common
+│   ├── System Update
+│   ├── UFW Firewall
+│   └── Deploy User
+│
+├── node
+│   └── Node.js 20
+│
+├── app
+│   ├── Clone Repository
+│   ├── Configure .env
+│   ├── Install Dependencies
+│   └── Build Frontend
+│
+├── pm2
+│   └── Process Manager
+│
+├── nginx
+│   └── Reverse Proxy
+│
+└── certbot
+    └── Let's Encrypt SSL
+```
 
 ---
 
 ## CI/CD Pipeline
-Pull Request opened
+```mermaid
+flowchart TD
+
+A[Pull Request Opened]
+
+A --> B[Test Job]
+B --> B1[npm test]
+B1 --> B2[Jest 15 Tests]
+
+A --> C[Lint Job]
+C --> C1[ESLint Frontend]
+
+A --> D[Security Scan]
+D --> D1[Trivy Filesystem Scan]
+D1 --> D2[Block on HIGH or CRITICAL CVEs]
+
+D2 --> E[Merge to main]
+
+E --> F[Deploy Job]
+
+F --> G[SSH into Oracle VM]
+G --> H[git pull origin main]
+H --> I[npm ci Backend]
+I --> J[npm ci && npm run build Frontend]
+J --> K[pm2 reload portfolio-backend]
+K --> L[curl /health]
+L --> M[HTTP 200 OK]
+```
+
+## 🚀 CI/CD Pipeline
+
+```text
+Pull Request Opened
 │
-├── job: test
-│     └── npm test (Jest — 15 tests)
+├── Test Job
+│   ├── npm test
+│   └── Jest (15 Tests)
 │
-├── job: lint
-│     └── ESLint frontend
+├── Lint Job
+│   └── ESLint Frontend
 │
-└── job: security-scan (needs: test)
-└── Trivy filesystem scan
-└── blocks on CRITICAL/HIGH CVEs
-Merge to main
+├── Security Scan
+│   ├── Trivy Filesystem Scan
+│   └── Blocks on HIGH / CRITICAL CVEs
 │
-└── job: deploy
+└── Merge to main
+    │
+    ▼
+Deploy Job
+│
 ├── SSH into Oracle VM
 ├── git pull origin main
-├── npm ci (backend)
-├── npm ci && npm run build (frontend)
+├── npm ci (Backend)
+├── npm ci && npm run build (Frontend)
 ├── pm2 reload portfolio-backend
-└── curl /health → must return 200
+└── curl /health
+    └── HTTP 200 OK
+```
 
 ---
 
