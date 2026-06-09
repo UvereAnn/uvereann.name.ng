@@ -31,6 +31,7 @@ const apiRateLimiter = rateLimit({
   max: 100,                  // max requests per window per IP
   // --- ADDED THIS LINE for test sake---
   skip: () => process.env.NODE_ENV === 'test',
+  validate: { xForwardForHeader: false},
   // ---------------------
   standardHeaders: true,     // adds RateLimit-* headers to response
   legacyHeaders: false,      // disables old X-RateLimit-* headers
@@ -62,6 +63,7 @@ const contactRateLimiter = rateLimit({
   max: 5,                    // max 5 contact form submissions per hour
   // --- ADDED THIS LINE for test sake ---
   skip: () => process.env.NODE_ENV === 'test',
+  validate: { xForwardForHeader: false},
   // ---------------------
   standardHeaders: true,
   legacyHeaders: false,

@@ -90,7 +90,7 @@ function seedProjects () {
   // Our master array is now the Single Source of Truth for portfolio configurations
   const masterProjects = [
     {
-      title: 'DevOps/Cloud Portfolio Platform',
+      title: 'DevOps/Cloud Portfolio Website',
       description: 'A self-hosting, production-grade web infrastructure project where the portfolio platform is the deployment target. Engineered automated CI/CD pipelines via GitHub Actions to enforce strict GitOps workflows, automated testing, and security gates, routing live production traffic through an Nginx reverse proxy on a hardened cloud instance',
       tags: JSON.stringify(['React', 'Node.js', 'Docker', 'GitHub Actions', 'Nginx', 'PM2', 'Ansible', 'Terraform', 'Oracle Cloud', 'SQLite', 'Grafana']),
       github_url: 'https://github.com/UvereAnn/uvereann.name.ng',
