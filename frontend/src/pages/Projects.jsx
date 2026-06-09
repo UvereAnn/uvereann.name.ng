@@ -4,6 +4,7 @@ import { useApi } from '../hooks/useApi'
 const CATEGORIES = ['All', 'DevOps', 'CI/CD', 'Backend', 'Cloud']
 
 function ProjectCard({ project }) {
+  
   return (
     <div className="card" style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 12 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
@@ -33,7 +34,7 @@ function ProjectCard({ project }) {
             style={{ color: 'var(--muted)', fontSize: '0.82rem', textDecoration: 'none', fontFamily: 'JetBrains Mono, monospace' }}
             onMouseOver={e => e.target.style.color = 'var(--accent)'}
             onMouseOut={e => e.target.style.color = 'var(--muted)'}>
-            → GitHub
+            → View GitHub Repo
           </a>
         )}
         {project.live_url && (
@@ -41,7 +42,7 @@ function ProjectCard({ project }) {
             style={{ color: 'var(--muted)', fontSize: '0.82rem', textDecoration: 'none', fontFamily: 'JetBrains Mono, monospace' }}
             onMouseOver={e => e.target.style.color = 'var(--accent2)'}
             onMouseOut={e => e.target.style.color = 'var(--muted)'}>
-            → Live
+            → View Live
           </a>
         )}
       </div>

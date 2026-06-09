@@ -102,8 +102,8 @@ function seedProjects () {
   insertMany([
     {
       title: 'DevOps Portfolio Platform',
-      description: 'This portfolio site — built with React, Node.js, and deployed with Docker and GitHub Actions CI/CD pipeline.',
-      tags: JSON.stringify(['React', 'Node.js', 'Docker', 'GitHub Actions', 'Nginx']),
+      description: 'A self-hosting, production-grade web infrastructure project where the portfolio platform is the deployment target. Engineered automated CI/CD pipelines via GitHub Actions to enforce strict GitOps workflows, automated testing, and security gates, routing live production traffic through an Nginx reverse proxy on a hardened cloud instance',
+      tags: JSON.stringify(['React', 'Node.js', 'Docker', 'GitHub Actions', 'Nginx', 'PM2', 'Ansible', 'Terraform', 'Oracle Cloud', 'SQLite']),
       github_url: 'https://github.com/UvereAnn/uvereann.name.ng',
       live_url: 'https://uvereann.name.ng',
       category: 'DevOps',
@@ -111,8 +111,8 @@ function seedProjects () {
     },
     {
       title: 'Health Blog',
-      description: 'Automated pipeline covering test, security scanning with Trivy, Docker build and push, and deployment via SSH.',
-      tags: JSON.stringify(['GitHub Actions', 'Docker', 'Trivy', 'CI/CD', 'Security']),
+      description: 'A cloud-native deployment strategy utilizing an automated AWS Fargate infrastructure blueprint. Configured isolated VPC networking, secure private subnets, and an automated rolling-update CD pipeline. Features a sidecar monitoring architecture running Prometheus and Grafana for real-time observability and live traffic load tracking',
+      tags: JSON.stringify(['AWS Fargate', 'ECS', 'Terraform', 'Prometheus', 'Grafana', 'Docker Compose', 'AWS RDS', 'GitHub Actions', 'S3 / DynamoDB']),
       github_url: 'https://github.com/UvereAnn/healthmattershub.com',
       live_url: 'https://healthmattershub.com',
       category: 'CI/CD',
@@ -120,8 +120,8 @@ function seedProjects () {
     },
     {
       title: 'Vehicle Registry System',
-      description: 'Production-ready Express API with multi-stage Docker build, non-root user, health checks, and rate limiting.',
-      tags: JSON.stringify(['Node.js', 'Docker', 'Express', 'Security', 'REST API']),
+      description: '"A highly secure, containerized CRUD backend service engineered with runtime stability and perimeter defenses. Implemented multi-stage Docker builds to slash attack surfaces, defensive rate-limiting middleware, systematic liveness/readiness health tracking, and precise SQL data persistence layers.',
+      tags: JSON.stringify(['Node.js', 'Express', 'Docker', 'REST API', 'Security', 'SQL', 'Input Validation', 'Rate Limiting']),
       github_url: 'https://github.com/UvereAnn/national_vehicle_registry',
       live_url: 'https://nationalvehicleregistry.com.ng',
       category: 'Backend',
@@ -129,8 +129,8 @@ function seedProjects () {
     },
     {
       title: 'DevSecOps Project',
-      description: 'Automated pipeline covering test, security scanning with Trivy, Docker build and push, and deployment via SSH.',
-      tags: JSON.stringify(['GitHub Actions', 'Docker', 'Trivy', 'CI/CD', 'Security']),
+      description: 'A defensive delivery blueprint focused on shift-left security automation. Built automated pipeline compliance gates that integrate static linting, backend testing suites, and container filesystem vulnerability analysis via Trivy, explicitly blocking staging merges on High or Critical CVE flags.',
+      tags: JSON.stringify(['GitHub Actions', 'Docker', 'Trivy', 'CI/CD', 'Security Gates', 'ESLint', 'Jest', 'SSH Deploy']),
       github_url: 'https://github.com/UvereAnn/End-to-End-DevSecOps-Suite',
       live_url: null,
       category: 'CI/CD',
@@ -138,20 +138,11 @@ function seedProjects () {
     },
     {
       title: 'Video to Audio Microservices',
-      description: 'Production-ready Express API with multi-stage Docker build, non-root user, health checks, and rate limiting.',
-      tags: JSON.stringify(['Node.js', 'Docker', 'Express', 'Security', 'REST API']),
+      description: 'A distributed microservice architecture designed to handle decoupled media processing workloads. Utilizes containerized execution layers to securely isolate system workloads, ingest payload data, execute asynchronous conversion scripts, and protect operational runtimes via unprivileged non-root user execution.',
+      tags: JSON.stringify(['Node.js', 'Express', 'Docker', 'Microservices', 'REST API', 'Security', 'Linux Runtime']),
       github_url: 'https://github.com/UvereAnn/video-to-audio-microservices',
       live_url: null,
       category: 'Backend',
-      featured: 0
-    },
-    {
-      title: 'Infrastructure as Code with Terraform',
-      description: 'GCP infrastructure provisioned with Terraform — Compute Engine, VPC, firewall rules, and static IP.',
-      tags: JSON.stringify(['Terraform', 'GCP', 'IaC', 'Cloud']),
-      github_url: 'https://github.com/yourusername/terraform-gcp',
-      live_url: null,
-      category: 'Cloud',
       featured: 0
     }
   ])

@@ -206,7 +206,7 @@ function Comments({ slug }) {
                   display: 'block', fontSize: '0.78rem',
                   color: 'var(--muted)', marginBottom: 6,
                   fontFamily: 'JetBrains Mono, monospace'
-                }}>email (optional)</label>
+                }}>email (This wont be published)</label>
                 <input
                   type="email" value={form.author_email}
                   onChange={e => setForm(f => ({ ...f, author_email: e.target.value }))}

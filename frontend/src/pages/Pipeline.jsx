@@ -50,6 +50,21 @@ const concepts = [
   { term: 'Idempotent Deploy', def: 'Running the deploy twice produces the same result. docker compose up -d is idempotent.' },
   { term: 'Health Check', def: 'After deploying, CI calls GET /health. If it returns 200, deploy is successful.' },
   { term: 'Rollback', def: 'If deploy fails, re-run the previous workflow. Docker image tags make this easy.' },
+  { term: 'Secrets Management', def: 'Sensitive info (SSH keys, API tokens) stored securely in GitHub Secrets, not in code.' },
+  { term: 'Shift Left', def: 'Testing and security scanning happen early in the pipeline (on PR), not after deployment.' },
+  { term: 'Infrastructure as Code', def: 'Managing and provisioning infrastructure through code rather than manual processes.' },
+  { term: 'Continuous Feedback', def: 'Automated notifications (e.g., GitHub checks) provide immediate feedback to developers on their code changes.' },
+  { term: 'Continuous Improvement', def: 'Regularly analyzing and improving the CI/CD pipeline for efficiency, reliability, and security.' },
+  { term: 'Blue-Green Deployment', def: 'A deployment strategy that reduces downtime and risk by running two identical production environments (blue and green). Only one environment serves live traffic at a time.' },
+  { term: 'Canary Release', def: 'A deployment strategy that gradually rolls out changes to a subset of users before making them available to everyone.' },
+  { term: 'GitOps', def: 'A practice that uses Git repositories as the single source of truth for declarative infrastructure and applications, enabling automated deployment and management.' },
+  { term: 'Immutable Infrastructure', def: 'A practice where infrastructure components are replaced rather than modified, ensuring consistency and reducing configuration drift.' },
+  { term: 'Artifact Repository', def: 'A storage location for built artifacts (e.g., Docker images, compiled code) that can be versioned and accessed by the deployment pipeline.' },
+  { term: 'Pipeline as Code', def: 'Defining the CI/CD pipeline configuration in code (e.g., YAML files) that can be versioned and stored in the same repository as the application code.' },
+  { term: 'Test Coverage', def: 'A measure of how much of the codebase is exercised by automated tests. High coverage can indicate a lower likelihood of undetected bugs.' },
+  { term: 'Deployment Strategy', def: 'A plan for how software updates are rolled out to users, including methods like blue-green or canary releases.' },
+  { term: 'Monitoring and Observability', def: 'The practice of instrumenting applications and infrastructure to collect metrics, logs, and traces for understanding system behavior and diagnosing issues.' },
+  { term: 'Continuous Delivery', def: 'An extension of continuous integration that ensures code changes are automatically prepared for a release to production, but may require manual approval before deployment.' },
 ]
 
 export default function Pipeline() {
@@ -166,7 +181,7 @@ jobs:
       <div>
         <div className="section-label">Concepts</div>
         <h2 style={{ fontFamily: 'Syne, sans-serif', fontSize: '1.4rem', fontWeight: 700, color: 'var(--text)', marginBottom: 20 }}>
-          Interview-Ready Explanations
+          Core Methodologies | Architecture Pillars
         </h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16 }}>
           {concepts.map(({ term, def }) => (

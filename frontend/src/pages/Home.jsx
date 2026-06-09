@@ -22,14 +22,24 @@ import { Link } from 'react-router-dom'
 
 const stack = [
   { label: 'Docker',         color: 'accent' },
-  { label: 'GitHub Actions', color: 'accent' },
+  { label: 'Docker compose', color: 'purple' },
+  { label: 'Git/Github',     color: 'accent' },
+  { label: 'GitHub Actions', color: 'purple' },
+  { label: 'Jenkins',        color: 'accent' },
   { label: 'Node.js',        color: 'purple' },
   { label: 'React',          color: 'purple' },
   { label: 'Nginx',          color: 'accent' },
   { label: 'GCP',            color: 'purple' },
+  { label: 'AWS',            color: 'accent' },
+  { label: 'Oracle Cloud',   color: 'purple' },
   { label: 'Terraform',      color: 'accent' },
+  { label: 'Ansible',        color: 'purple' },
   { label: 'Linux',          color: 'purple' },
+  { label: 'Bash/Shell',     color: 'accent' },
   { label: 'SQLite',         color: 'accent' },
+  { label: 'Prometheus',     color: 'purple' },
+  { label: 'Grafana',        color: 'accent' },
+  { label: 'Argo CD',        color: 'purple' },
   { label: 'Trivy',          color: 'purple' },
   { label: 'CI/CD',          color: 'accent' },
   { label: 'Kubernetes',     color: 'purple' },
@@ -150,6 +160,7 @@ function ProfilePhoto() {
             src="/profile.jpg"
             alt="Uverean — DevOps Engineer"
             onError={() => setImgError(true)}
+            className="profile-image"
             style={{
               width: 500,
               height: 500,
@@ -163,7 +174,8 @@ function ProfilePhoto() {
           />
         ) : (
           /* Fallback when no photo is found */
-          <div style={{
+          <div className="profile-image"
+            style={{
             width: 220,
             height: 220,
             borderRadius: '50%',
@@ -365,6 +377,18 @@ export default function Home() {
           }
           .hero-text  { order: 2; }
           .hero-photo { order: 1; }
+
+          /* Reduce image size on mobile only */
+          .profile-image {
+            width: 200px !important;
+            height: 200px !important;
+          }
+          
+          /* Reduce heading text size on mobile only */
+          .hero-title {
+            font-size: clamp(1.2rem, 3vw, 1.3rem) !important;
+            line-height: 1.35 !important;
+          }
         }
       `}</style>
     </div>
