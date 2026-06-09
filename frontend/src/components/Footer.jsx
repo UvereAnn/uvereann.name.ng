@@ -41,7 +41,7 @@ export default function Footer() {
           ))}
         </div>
         <p style={{ color: 'var(--muted)', fontSize: '0.78rem', fontFamily: 'JetBrains Mono, monospace' }}>
-          Built with React + Node.js
+          Copyright &copy; {new Date().getFullYear()} uverean.name.ng. All rights reserved.
         </p>
       </div>
     </footer>

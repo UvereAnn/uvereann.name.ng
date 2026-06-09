@@ -61,6 +61,9 @@ export default function Contact() {
         Open to DevOps and Cloud engineering roles, consulting, and
         interesting infrastructure conversations.
       </p>
+        <p style={{ color: 'var(--muted)' }}>
+          please fill out the form below or email me directly at <b style={{color: 'var(--accent2)'}}><a href="mailto:ann.ugwuonu@gmail.com">ann.ugwuonu@gmail.com</a></b>
+        </p>
 
       {status === 'success' ? (
         <div className="card" style={{ padding: 32, textAlign: 'center' }}>

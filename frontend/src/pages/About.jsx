@@ -53,43 +53,47 @@ const SKILL_GROUPS = [
     category: 'Containerisation & Orchestration',
     color: 'accent',
     skills: [
-      { name: 'Docker',               level: 80 },
-      { name: 'Docker Compose',       level: 85 },
-      { name: 'Kubernetes',           level: 45 },
-      { name: 'k3s',                  level: 55 },
-      {name: 'minikube',              level: 60 },
+      { name: 'Docker',               level: 100 },
+      { name: 'Docker Compose',       level: 100 },
+      { name: 'Kubernetes',           level: 100 },
+      { name: 'microk8s',             level: 100 },
+      { name: 'minikube',             level: 100 },
     ]
   },
   {
     category: 'CI/CD & Automation',
     color: 'purple',
     skills: [
-      { name: 'GitHub Actions',       level: 80 },
-      { name: 'Git / GitHub Flow',    level: 85 },
-      { name: 'Trivy Security Scan',  level: 75 },
-      { name: 'Shell Scripting',      level: 65 },
-      { name: 'Jenkins',              level: 65 },
+      { name: 'GitHub Actions',       level: 100 },
+      { name: 'Git / GitHub Flow',    level: 100 },
+      { name: 'Trivy Security Scan',  level: 100 },
+      { name: 'Shell Scripting',      level: 100 },
+      { name: 'Jenkins',              level: 100 },
     ]
   },
   {
     category: 'Cloud & Infrastructure',
     color: 'accent',
     skills: [
-      { name: 'GCP',                  level: 60 },
-      { name: 'AWS',                  level: 60 },
-      { name: 'Vercel / Railway',     level: 80 },
-      { name: 'Terraform (learning)', level: 40 },
-      { name: 'Nginx',                level: 70 },
+      { name: 'GCP',                  level: 100 },
+      { name: 'AWS',                  level: 100 },
+      { name: 'Oracle Cloud',         level: 100 },
+      { name: 'Terraform',            level: 100 },
+      { name: 'Ansible',              level: 100 },
+      { name: 'Nginx',                level: 100 },
     ]
   },
   {
     category: 'Development',
     color: 'purple',
     skills: [
-      { name: 'Node.js / Express',    level: 75 },
-      { name: 'React / Vite',         level: 70 },
-      { name: 'SQLite / SQL',         level: 70 },
-      { name: 'Linux / Ubuntu',       level: 75 },
+      { name: 'Node.js / Express',    level: 100 },
+      { name: 'Python / Flask',       level: 100 },
+      { name: 'Go',                   level: 100 },
+      { name: 'REST APIs',             level: 100 },
+      { name: 'React / Vite',         level: 100 },
+      { name: 'SQLite / SQL',         level: 100 },
+      { name: 'Linux / Ubuntu',       level: 100 },
     ]
   },
 ]
@@ -97,33 +101,32 @@ const SKILL_GROUPS = [
 // ── Edit your timeline with real dates and events ─────────────
 const TIMELINE = [
   {
-    period: '2025 — Present',
-    title: 'Building DevOps Portfolio',
-    desc: 'Designed and built a production-grade portfolio platform demonstrating CI/CD, Docker, security scanning, and cloud deployment. Every feature shipped via PR with automated testing.',
-    tags: ['React', 'Node.js', 'Docker', 'GitHub Actions', 'Trivy'],
+    period: '2024 — Present',
+    title: `CloudOps Infrastructure & Platform Engineering
+    One Time Education Effects Ltd`,
+    desc: `Engineered and maintained automated cloud-native platforms across multi-environment infrastructures. Scaled and managed containerized workloads using Docker, Kubernetes, microk8s, and minikube while driving continuous delivery automation through GitHub Actions pipelines, cutting deployment times by 20%. Embedded automated Trivy Security Scans directly into production gates to protect application lifecycles. 
+    Driven by a freelance and corporate focus on infrastructure resiliency, standardizing cloud provisioning using Terraform (IaC) templates to achieve 99%+ service availability across AWS and GCP clouds.`,
+    tags: ['React', 'Node.js','AWS', 'GCP','Git/Github', 'Docker','Terraform','Ansible','Nginx', 'GitHub Actions', 'Trivy'],
     color: 'accent'
   },
   {
-    period: '2024 — 2025',
-    title: 'Learning Cloud & Infrastructure',
-    desc: 'Deep dive into containerisation, Kubernetes, GCP, and infrastructure as code. Built multiple projects to understand the full deployment lifecycle.',
-    tags: ['Docker', 'Kubernetes', 'GCP', 'Terraform'],
+    period: '2022 — 2024',
+    title: `Enterprise Systems Engineering & ERP Operations 
+    Attain Enterprise Solutions Ltd`,
+    desc: `Maintained, updated, and troubleshooted core financial and operational workflows inside Microsoft Dynamics NAV (Navision) environments for 50+ enterprise users. Managed the business logic tier and underlying relational database layer built on MS SQL Server, utilizing T-SQL queries and stored procedures to resolve data synchronization issues and optimize operational reporting.
+    Supported and diagnosed internal web portals and business applications built with MS dynamics Navison, ensuring smooth frontend behavior and system usability.`,
+    tags: ['Dynamics NAV', 'C/SIDE (Object Designer)', 'C/AL Language', 'MS SQL Server', 'T-SQL', 'Windows Server'],
     color: 'purple'
   },
   {
-    period: '2023 — 2024',
-    title: 'Backend Development',
-    desc: 'Built REST APIs with Node.js and Python. Learned databases, authentication, and how the server side of web applications work.',
-    tags: ['Node.js', 'Python', 'SQL', 'REST APIs'],
+    period: '2020 — 2021',
+    title: `Full-Stack & Core Web Development
+    DNL Global Consult | Internships & Personal Gigs`,
+    desc: `Began the engineering journey building responsive, accessible web applications and data services for various clients. Developed scalable backend microservices and RESTful API structures using Node.js / Express and Python, integrating light data stores with SQLite / SQL and MongoDB
+    Orchestrated local application setups natively across Linux / Ubuntu operating systems, establishing rigorous source code control and peer-review workflows using Git / GitHub Flow..`,
+    tags: ['Node.js/Express', 'Python','ReactJs', 'SQL', 'SQLite', 'REST APIs', 'Git/Github'],
     color: 'accent'
-  },
-  {
-    period: '2022 — 2023',
-    title: 'Started the Journey',
-    desc: 'First exposure to programming, Linux, and the world of software engineering. Realised the infrastructure layer was the most interesting part.',
-    tags: ['Linux', 'Python', 'Git'],
-    color: 'purple'
-  },
+  }
 ]
 
 // ── Stats — edit with your real numbers ───────────────────────
@@ -145,12 +148,18 @@ function SkillBar({ name, level, color }) {
         fontSize: '0.85rem'
       }}>
         <span style={{ color: 'var(--text)' }}>{name}</span>
-        <span style={{
+        {/*<span style={{
           fontFamily: 'JetBrains Mono, monospace',
           fontSize: '0.75rem',
           color: color === 'accent' ? 'var(--accent)' : 'var(--accent2)'
         }}>
           {level}%
+        </span>*/}
+        {/* Replaced {level}% with a Tailwind-styled checkmark */}
+        <span className={`font-sans text-xs font-bold ${
+          color === 'accent' ? 'text-[var(--accent)]' : 'text-[var(--accent2)]'
+        }`}>
+          ✓
         </span>
       </div>
       <div style={{
@@ -367,6 +376,131 @@ export default function About() {
         </div>
       </section>
 
+      {/* ── Education & Certifications Section ─────────────────────────────────── */}
+<section style={{ marginBottom: 80 }}>
+  <div className="section-label">Credentials</div>
+  
+  <div style={{
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+    gap: 32,
+    marginTop: 16
+  }}>
+    {/* Left Column: Education */}
+    <div className="card" style={{ padding: 24, background: 'var(--surface2)', borderRadius: 16 }}>
+      <h3 style={{
+        fontFamily: 'Syne, sans-serif',
+        fontSize: '1.3rem',
+        fontWeight: 700,
+        color: 'var(--text)',
+        marginBottom: 20,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8
+      }}>
+        <span>🎓</span> Education
+      </h3>
+      
+      <div style={{ marginBottom: 16 }}>
+        <h4 style={{ color: 'var(--text)', fontWeight: 600, fontSize: '1rem' }}>
+          BS in Computer Science 
+        </h4>
+        <div style={{ 
+          fontFamily: 'JetBrains Mono, monospace', 
+          fontSize: '0.75rem', 
+          color: 'var(--accent)',
+          margin: '4px 0'
+        }}>
+          Federal University of Lafia, Nigeria | 2015 - 2019
+        </div>
+        <p style={{ color: 'var(--text)', fontSize: '0.85rem', lineHeight: 1.5, textAlign: 'justify' }}>
+          CGPA: 4.15 / 5.0
+        </p>
+        <p style={{ color: 'var(--muted)', fontSize: '0.85rem', lineHeight: 1.5, textAlign: 'justify' }}>
+          Graduated with a Bachelor of Science in Computer Science, where I developed a strong foundation in algorithms, data structures, and software engineering principles. My coursework included operating systems, database management, and network security, which sparked my interest in DevOps and cloud infrastructure. <br />
+          I completed a capstone project focused on building a scalable web application using microservices architecture, 
+          which further solidified my passion for automation and cloud technologies.  
+        </p>
+      </div>
+    </div>
+
+    {/* Right Column: Certifications */}
+    <div className="card" style={{ padding: 24, background: 'var(--surface2)', borderRadius: 16 }}>
+      <h3 style={{
+        fontFamily: 'Syne, sans-serif',
+        fontSize: '1.3rem',
+        fontWeight: 700,
+        color: 'var(--text)',
+        marginBottom: 20,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8
+      }}>
+        <span>🏅</span> Certifications
+      </h3>
+
+      {/* Cert 1 */}
+      <div style={{ marginBottom: 16 }}>
+        <h4 style={{ color: 'var(--text)', fontWeight: 600, fontSize: '1rem' }}>
+          KCNA: Kubernetes and Cloud Native Associate
+        </h4>
+        <div style={{ 
+          fontFamily: 'JetBrains Mono, monospace', 
+          fontSize: '0.75rem', 
+          color: 'var(--accent2)',
+          marginTop: 4
+        }}>
+          The Linux Foundation • Issued 2026
+        </div>
+      </div>
+
+      {/* Cert 2 */}
+      <div>
+        <h4 style={{ color: 'var(--text)', fontWeight: 600, fontSize: '1rem' }}>
+          Associate Cloud Engineer Certification(ACE)
+        </h4>
+        <div style={{ 
+          fontFamily: 'JetBrains Mono, monospace', 
+          fontSize: '0.75rem', 
+          color: 'var(--accent2)',
+          marginTop: 4
+        }}>
+          Google Cloud • Issued 2026
+        </div>
+      </div><br />
+      {/* Cert 3 */}
+      <div style={{ marginBottom: 16 }}>
+        <h4 style={{ color: 'var(--text)', fontWeight: 600, fontSize: '1rem' }}>
+          Microsoft Certified: Dynamics 365 Fundamentals (CRM)
+        </h4>
+        <div style={{ 
+          fontFamily: 'JetBrains Mono, monospace', 
+          fontSize: '0.75rem', 
+          color: 'var(--accent2)',
+          marginTop: 4
+        }}>
+          Microsoft • Issued 2023 (Does not expire)
+        </div>
+      </div>
+
+      {/* Cert 4 */}
+      <div>
+        <h4 style={{ color: 'var(--text)', fontWeight: 600, fontSize: '1rem' }}>
+          Microsoft Certified: Azure AI Fundamentals
+        </h4>
+        <div style={{ 
+          fontFamily: 'JetBrains Mono, monospace', 
+          fontSize: '0.75rem', 
+          color: 'var(--accent2)',
+          marginTop: 4
+        }}>
+          Microsoft • Issued 2022 (Does not expire)
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
       {/* ── Skills ────────────────────────────────────────────── */}
       <section style={{ marginBottom: 80 }}>
         <div className="section-label">Skills</div>
@@ -414,7 +548,7 @@ export default function About() {
           color: 'var(--text)',
           marginBottom: 40
         }}>
-          My Learning Journey
+          My Cloud/DevOps Journey
         </h2>
 
         <div style={{ position: 'relative' }}>
@@ -428,7 +562,7 @@ export default function About() {
             background: 'var(--border)'
           }} />
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }} >
             {TIMELINE.map(({ period, title, desc, tags, color }, i) => (
               <div key={i} style={{
                 display: 'flex',
@@ -463,7 +597,8 @@ export default function About() {
                     fontWeight: 700,
                     color: 'var(--text)',
                     marginBottom: 8,
-                    fontSize: '1.05rem'
+                    fontSize: '1.05rem',
+                    whiteSpace: 'pre-line'
                   }}>
                     {title}
                   </h3>
@@ -471,7 +606,8 @@ export default function About() {
                     color: 'var(--muted)',
                     fontSize: '0.875rem',
                     lineHeight: 1.7,
-                    marginBottom: 12
+                    marginBottom: 12,
+                    whiteSpace: 'pre-line'
                   }}>
                     {desc}
                   </p>
@@ -541,5 +677,6 @@ export default function About() {
         }
       `}</style>
     </div>
-  )
+  
+)
 }

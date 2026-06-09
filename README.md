@@ -130,21 +130,31 @@ cd frontend && npm run dev
 
 ---
 
-## API Endpoints
-GET  /health                              liveness check
-GET  /health/ready                        readiness check (tests DB connection)
-GET  /api/projects                        all projects
-GET  /api/projects/:id                    single project
-GET  /api/blog                            all blog posts (no content — list view)
-GET  /api/blog/:slug                      single post with full content
-GET  /api/blog/:slug/comments             approved comments for a post
-POST /api/blog/:slug/comments             submit a comment (requires moderation)
-GET  /api/blog/:slug/likes                like count + whether you liked it
-POST /api/blog/:slug/like                 toggle like (IP-based deduplication)
-POST /api/contact                         contact form submission
-GET  /api/admin/messages?secret=          view contact submissions (protected)
-GET  /api/admin/comments?secret=          moderate blog comments (protected)
-GET  /api/admin/likes?secret=             view like counts (protected)
+# API Endpoints
+
+## 🔍 Health
+- `GET /health` — Liveness check
+- `GET /health/ready` — Readiness check (tests DB connection)
+
+## 📁 Projects
+- `GET /api/projects` — Get all projects
+- `GET /api/projects/:id` — Get single project
+
+## 📝 Blog
+- `GET /api/blog` — Get all blog posts (no content — list view)
+- `GET /api/blog/:slug` — Get single post with full content
+- `GET /api/blog/:slug/comments` — Get approved comments for a post
+- `POST /api/blog/:slug/comments` — Submit a comment (requires moderation)
+- `GET /api/blog/:slug/likes` — Get like count + whether you liked it
+- `POST /api/blog/:slug/like` — Toggle like (IP-based deduplication)
+
+## 📧 Contact
+- `POST /api/contact` — Contact form submission
+
+## 🔒 Admin (Protected)
+- `GET /api/admin/messages?secret=` — View contact submissions
+- `GET /api/admin/comments?secret=` — Moderate blog comments
+- `GET /api/admin/likes?secret=` — View like counts
 
 ---
 
@@ -302,4 +312,26 @@ Deploy Job
 - Trivy CVE scanning blocks vulnerable dependencies from deploying
 - HTTPS enforced — HTTP redirects to HTTPS via Nginx
 - Admin endpoints protected by secret key
+---
 
+## 📸 Deployment Validation
+
+<details>
+<summary>Click to view screenshots</summary>
+
+### GitHub Actions
+
+All tests passing
+
+![GitHub Actions](./frontend/public/screenshots/github-actions-passing1.png)
+![GitHub Actions](./frontend/public/screenshots/github-actions-passing2.png)
+
+### Oracle Cloud Console
+
+Service status: Running
+
+![Oracle Cloud](./frontend/public/screenshots/oracle-cloud-running1.png)
+![Oracle Cloud](./frontend/public/screenshots/oracle-cloud-running2.png)
+![Oracle Cloud](./frontend/public/screenshots/oracle-cloud-running3.png)
+
+</details>
