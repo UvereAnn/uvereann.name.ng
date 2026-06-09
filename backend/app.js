@@ -9,6 +9,7 @@
 const express = require('express')
 const cors = require('cors')
 const morgan = require('morgan')
+const client = require('prom-client')
 
 const healthRouter          = require('./app/routers/health')
 const projectsRouter        = require('./app/routers/projects')
@@ -30,6 +31,35 @@ const app = express()
 //    from the X-Forwarded-For header Nginx sends
 // 2. req.ip returns the real client IP, not 127.0.0.1
 app.set('trust proxy', 1)
+
+// ── 📊 PROMETHEUS METRICS INSTRUMENTATION ─────────────────────
+// Collect default process metrics (CPU, Memory, Event Loop lag)
+client.collectDefaultMetrics({ register: client.register })
+
+// Create a histogram to track request Rate, Errors, and Duration (RED Method)
+const httpRequestDurationSeconds = new client.Histogram({
+  name: 'http_request_duration_seconds',
+  help: 'Duration of HTTP requests in seconds',
+  labelNames: ['method', 'route', 'status_code'],
+  buckets: [0.1, 0.3, 0.5, 0.7, 1.0, 3.0, 5.0] // Ranges from 100ms to 5 seconds
+})
+
+// Middleware to intercept and time all requests
+app.use((req, res, next) => {
+  const end = httpRequestDurationSeconds.startTimer()
+  res.on('finish', () => {
+    // Exclude the /metrics endpoint itself to prevent data pollution
+    if (req.route && req.path !== '/metrics') {
+      end({ 
+        method: req.method, 
+        route: req.route.path, 
+        status_code: res.statusCode 
+      })
+    }
+  })
+  next()
+})
+// ─────────────────────────────────────────────────────────────
 
 // ── Middleware ────────────────────────────────────────────────
 
@@ -60,6 +90,16 @@ app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'))
 app.use('/api/', apiRateLimiter)
 
 // ── Routes ────────────────────────────────────────────────────
+
+// 📊 EXPOSE THE /metrics ENDPOINT FOR GRAFANA CLOUD TO SCRAPE
+app.get('/metrics', async (req, res) => {
+  try {
+    res.setHeader('Content-Type', client.register.contentType)
+    res.send(await client.register.metrics())
+  } catch (err) {
+    res.status(500).send(err.message)
+  }
+})
 
 app.use('/health',                    healthRouter)
 app.use('/api/projects',              projectsRouter)

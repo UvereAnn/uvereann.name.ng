@@ -31,10 +31,10 @@
     iptables -P FORWARD ACCEPT
     iptables -P OUTPUT ACCEPT
     
-    # Reinstall essential base utilities smoothly
+    # Reinstall essential base utilities smoothly (Added acl here 🌟)
     dpkg --configure -a
     apt-get install -f -y
-    apt-get install -y curl wget git unzip build-essential software-properties-common fail2ban
+    apt-get install -y curl wget git unzip build-essential software-properties-common fail2ban acl
   become: true
 
 - name: Set timezone to UTC

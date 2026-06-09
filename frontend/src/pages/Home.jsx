@@ -86,6 +86,7 @@ function Terminal() {
       const t = setTimeout(() => setVisible(i + 1), line.delay + 400)
       return () => clearTimeout(t)
     })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
