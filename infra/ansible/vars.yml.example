@@ -13,3 +13,6 @@ db_path: "/srv/portfolio/backend/database.db"
 resend_api_key: "re_your_key_here"
 notify_email: "your@email.com"
 admin_secret: "your_long_random_secret"
+loki_url: "https://logs-prod-xxx.grafana.net"   # Replace with your Grafana Loki URL
+loki_user_id: "your_user_id"                    # Replace with your Grafana User ID
+loki_api_token: "your_cloud_access_token"       # Replace with your Grafana Access Policy Token

@@ -87,23 +87,12 @@ function initializeDatabase () {
 }
 
 function seedProjects () {
-  const count = db.prepare('SELECT COUNT(*) as count FROM projects').get()
-  if (count.count > 0) return
-
-  const insert = db.prepare(`
-    INSERT INTO projects (title, description, tags, github_url, live_url, category, featured)
-    VALUES (@title, @description, @tags, @github_url, @live_url, @category, @featured)
-  `)
-
-  const insertMany = db.transaction((projects) => {
-    for (const project of projects) insert.run(project)
-  })
-
-  insertMany([
+  // Our master array is now the Single Source of Truth for portfolio configurations
+  const masterProjects = [
     {
-      title: 'DevOps Portfolio Platform',
+      title: 'DevOps/Cloud Portfolio Platform',
       description: 'A self-hosting, production-grade web infrastructure project where the portfolio platform is the deployment target. Engineered automated CI/CD pipelines via GitHub Actions to enforce strict GitOps workflows, automated testing, and security gates, routing live production traffic through an Nginx reverse proxy on a hardened cloud instance',
-      tags: JSON.stringify(['React', 'Node.js', 'Docker', 'GitHub Actions', 'Nginx', 'PM2', 'Ansible', 'Terraform', 'Oracle Cloud', 'SQLite']),
+      tags: JSON.stringify(['React', 'Node.js', 'Docker', 'GitHub Actions', 'Nginx', 'PM2', 'Ansible', 'Terraform', 'Oracle Cloud', 'SQLite', 'Grafana']),
       github_url: 'https://github.com/UvereAnn/uvereann.name.ng',
       live_url: 'https://uvereann.name.ng',
       category: 'DevOps',
@@ -120,7 +109,7 @@ function seedProjects () {
     },
     {
       title: 'Vehicle Registry System',
-      description: '"A highly secure, containerized CRUD backend service engineered with runtime stability and perimeter defenses. Implemented multi-stage Docker builds to slash attack surfaces, defensive rate-limiting middleware, systematic liveness/readiness health tracking, and precise SQL data persistence layers.',
+      description: 'A highly secure, containerized CRUD backend service engineered with runtime stability and perimeter defenses. Implemented multi-stage Docker builds to slash attack surfaces, defensive rate-limiting middleware, systematic liveness/readiness health tracking, and precise SQL data persistence layers.',
       tags: JSON.stringify(['Node.js', 'Express', 'Docker', 'REST API', 'Security', 'SQL', 'Input Validation', 'Rate Limiting']),
       github_url: 'https://github.com/UvereAnn/national_vehicle_registry',
       live_url: 'https://nationalvehicleregistry.com.ng',
@@ -145,7 +134,49 @@ function seedProjects () {
       category: 'Backend',
       featured: 0
     }
-  ])
+  ]
+
+  // Wrap inside a better-sqlite3 transaction for ACID speed and safety
+  const runUpsertTransaction = db.transaction((projects) => {
+    for (const project of projects) {
+      // Check if a project with this exact title already exists
+      const existing = db.prepare('SELECT id FROM projects WHERE title = ?').get(project.title)
+
+      if (existing) {
+        // Safe Update: Sync modifications over existing rows using its unique ID
+        db.prepare(`
+          UPDATE projects SET 
+            description = ?, tags = ?, github_url = ?, live_url = ?, category = ?, featured = ?
+          WHERE id = ?
+        `).run(
+          project.description, 
+          project.tags, 
+          project.github_url, 
+          project.live_url, 
+          project.category, 
+          project.featured, 
+          existing.id
+        )
+      } else {
+        // Insert a fresh row if it's a completely new project configuration
+        db.prepare(`
+          INSERT INTO projects (title, description, tags, github_url, live_url, category, featured)
+          VALUES (?, ?, ?, ?, ?, ?, ?)
+        `).run(
+          project.title, 
+          project.description, 
+          project.tags, 
+          project.github_url, 
+          project.live_url, 
+          project.category, 
+          project.featured
+        )
+      }
+    }
+  })
+
+  // Execute the transaction loop
+  runUpsertTransaction(masterProjects)
 }
 
 function seedBlogPosts () {

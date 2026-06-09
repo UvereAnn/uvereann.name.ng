@@ -27,3 +27,4 @@
     - pm2        # process manager — keeps Node.js running
     - nginx      # reverse proxy + serve React files
     - certbot    # HTTPS with Let's Encrypt
+    - telemetry   # Promtail client to ship logs to Grafana Loki
