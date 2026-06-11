@@ -38,6 +38,7 @@ L --> M[SQLite Database]
 
 I --> N[PM2 Process Manager]
 I --> O[Let's Encrypt SSL]
+I --> P[Observability Stack<br/>Grafana + Loki + Promtail]
 ```
 
 ## 🏗️ Architecture
@@ -76,6 +77,11 @@ Oracle Cloud VM
 │
 ├── PM2 Process Manager
 │
+├── Observability Stack
+│   ├── Promtail (log agent)
+│   ├── Grafana Loki (log storage)
+│   └── Grafana (log querying & visualization)
+│
 └── Let's Encrypt SSL
 ```
 
@@ -95,6 +101,7 @@ Oracle Cloud VM
 | Configuration | Ansible | Configure and deploy to VM |
 | CI/CD | GitHub Actions | Test, scan, deploy on every push |
 | Security Scanning | Trivy | Dependency CVE scanning |
+| Observability | Grafana, Loki, Promtail | Centralized logging & telemetry |
 | Cloud | Oracle Cloud (Always Free) | Production hosting |
 
 ---
@@ -108,8 +115,37 @@ Oracle Cloud VM
 - **Zero-downtime deploys** — PM2 reload keeps the backend serving traffic during restarts
 - **Automated HTTPS** — Certbot obtains and auto-renews Let's Encrypt certificates
 - **Security hardening** — UFW firewall, non-root deploy user, rate limiting, input validation, XSS prevention
-- **Observability** — Health check endpoints, PM2 process monitoring, structured request logging
+- **Observability** — Health check endpoints, PM2 process monitoring, structured request logging, Centralized logging pipeline using Promtail, Grafana Loki, and Grafana for real-time visibility into application and system behavior
 - **GitOps workflow** — Branch protection, required CI checks, PR-based deployments
+
+---
+
+## 🔭 Observability (Logging & Telemetry)
+
+This project includes a production-grade logging pipeline for full system visibility.
+
+### Logging Pipeline
+
+- **Application logs (PM2)** are written from Node.js backend (`out.log`, `error.log`)
+- **System logs** are collected from `/var/log` (auth, kernel, sudo, dpkg, fail2ban)
+- **Promtail agent** runs on the VM and continuously tails these logs
+- Logs are shipped to **Grafana Loki** for indexing and querying
+
+### Log Labeling
+
+Logs are structured with labels such as:
+
+- `job="portfolio-backend"`
+- `job="varlogs"`
+- `host="portfolio-vm"`
+
+### Log Query Examples (Grafana Explore)
+
+```logql
+{job="portfolio-backend"}
+{job="varlogs"} |= "error"
+{job="varlogs"} |= "sudo"
+```
 
 ---
 
@@ -162,7 +198,6 @@ cd frontend && npm run dev
 
 ```mermaid
 flowchart TD
-
 A[Terraform]
 
 A --> B[Oracle Cloud<br/>uk-london-1]
@@ -184,6 +219,23 @@ J --> J3[app]
 J --> J4[pm2]
 J --> J5[nginx]
 J --> J6[certbot]
+
+%% Observability (integrated into same structure style)
+
+G --> O1[PM2 Process Manager]
+O1 --> O1a[Application Logs<br/>out.log]
+O1 --> O1b[Error Logs<br/>error.log]
+
+G --> O2[System Logs<br/>/var/log]
+O2 --> O2a[auth.log]
+O2 --> O2b[kern.log]
+O2 --> O2c[syslog]
+O2 --> O2d[dpkg.log]
+O2 --> O2e[fail2ban.log]
+
+G --> O3[Promtail Agent]
+O3 --> O4[Grafana Loki]
+O4 --> O5[Grafana Dashboards]
 ```
 
 ## ☁️ Infrastructure
@@ -212,6 +264,17 @@ Terraform (infra/terraform/)
     │   ├── 1 GB RAM
     │   └── Always Free
     │
+    ├── Observability Stack
+    │   ├── PM2 Log Files (out.log, error.log)
+    │   ├── System Logs (/var/log)
+    │   │   ├── auth.log
+    │   │   ├── syslog
+    │   │   ├── kern.log
+    │   │   ├── dpkg.log
+    │   │   └── fail2ban.log
+    │   ├── Promtail Agent (log shipper)
+    │   └── Grafana Loki (log storage + querying)
+    │
     └── Reserved Public IP
 
 Ansible (infra/ansible/)
@@ -231,18 +294,24 @@ Ansible (infra/ansible/)
 │   └── Build Frontend
 │
 ├── pm2
-│   └── Process Manager
+│   └── Process Manager + Logging
 │
 ├── nginx
 │   └── Reverse Proxy
 │
-└── certbot
-    └── Let's Encrypt SSL
+├── certbot
+│   └── Let's Encrypt SSL
+│
+└── observability
+    ├── Promtail configuration
+    ├── Log sources setup (/var/log + PM2 logs)
+    └── Grafana Loki pipeline
 ```
 
 ---
 
-## CI/CD Pipeline
+## CI/CD Pipeline + Observability
+
 ```mermaid
 flowchart TD
 
@@ -270,6 +339,25 @@ I --> J[npm ci && npm run build Frontend]
 J --> K[pm2 reload portfolio-backend]
 K --> L[curl /health]
 L --> M[HTTP 200 OK]
+
+%% Observability flow
+K --> N[PM2 Logs]
+N --> N1[stdout / stderr logs]
+
+I --> O[Application Logging Layer]
+O --> O1[Structured API logs]
+
+G --> P[System Logs (/var/log)]
+P --> P1[auth.log / kern.log / dpkg.log / fail2ban.log]
+
+N1 --> Q[Promtail Agent]
+O1 --> Q
+P1 --> Q
+
+Q --> R[Grafana Loki]
+R --> S[Grafana Dashboards]
+
+
 ```
 
 ## 🚀 CI/CD Pipeline
@@ -298,8 +386,22 @@ Deploy Job
 ├── npm ci (Backend)
 ├── npm ci && npm run build (Frontend)
 ├── pm2 reload portfolio-backend
-└── curl /health
-    └── HTTP 200 OK
+├── curl /health
+│   └── HTTP 200 OK
+│
+└── Observability Pipeline
+    │
+    ├── PM2 logs (out.log / error.log)
+    ├── Node.js structured logs (API requests, errors)
+    ├── System logs (/var/log)
+    │   ├── auth.log
+    │   ├── kern.log
+    │   ├── dpkg.log
+    │   └── fail2ban.log
+    │
+    ├── Promtail agent (log shipper)
+    └── Grafana Loki (log storage + querying)
+        └── Grafana Dashboards (visualization + alerting)
 ```
 
 ## Security

@@ -23,7 +23,7 @@ function initializeDatabase () {
   db.exec(`
     CREATE TABLE IF NOT EXISTS projects (
       id          INTEGER PRIMARY KEY AUTOINCREMENT,
-      title       TEXT    NOT NULL,
+      title       TEXT    NOT NULL UNIQUE,
       description TEXT    NOT NULL,
       tags        TEXT    NOT NULL,
       github_url  TEXT,
@@ -91,7 +91,8 @@ function seedProjects () {
   const masterProjects = [
     {
       title: 'DevOps/Cloud Portfolio Website',
-      description: 'A self-hosting, production-grade web infrastructure project where the portfolio platform is the deployment target. Engineered automated CI/CD pipelines via GitHub Actions to enforce strict GitOps workflows, automated testing, and security gates, routing live production traffic through an Nginx reverse proxy on a hardened cloud instance',
+      description: `A self-hosting, production-grade web infrastructure project where the portfolio platform is the deployment target. Engineered automated CI/CD pipelines via GitHub Actions to enforce GitOps workflows, automated testing, and security gates, with production traffic routed through an Nginx reverse proxy on a hardened cloud instance.
+                    Implemented observability using centralized logging for application (PM2/Node.js) and system logs, shipped via Promtail to Grafana Loki for real-time debugging and operational visibility.`,
       tags: JSON.stringify(['React', 'Node.js', 'Docker', 'GitHub Actions', 'Nginx', 'PM2', 'Ansible', 'Terraform', 'Oracle Cloud', 'SQLite', 'Grafana']),
       github_url: 'https://github.com/UvereAnn/uvereann.name.ng',
       live_url: 'https://uvereann.name.ng',

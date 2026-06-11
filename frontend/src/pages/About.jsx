@@ -96,6 +96,23 @@ const SKILL_GROUPS = [
       { name: 'Linux / Ubuntu',       level: 100 },
     ]
   },
+  {
+    category: 'Observability & Monitoring',
+    color: 'accent',
+    skills: [
+      { name: 'Prometheus',           level: 100 },
+      { name: 'Grafana',              level: 100 },
+      { name: 'Application Logging',  level: 100 },
+      { name: 'Production Debugging', level: 100 },
+      { name: 'Log Querying',         level: 100 },
+      { name: 'Centralized Logging(Grafana Loki)',  level: 100 },
+      { name: 'Structured Logging',       level: 100 },
+      { name: 'Monitoring Dashboards',       level: 100 },
+      { name: 'Alerting Systems',       level: 100 },
+      { name: 'Health Checks',       level: 100 },
+      { name: 'Log Shipping',       level: 100 },
+    ]
+  },
 ]
 
 // ── Edit your timeline with real dates and events ─────────────
