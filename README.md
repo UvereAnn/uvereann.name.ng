@@ -335,29 +335,32 @@ E --> F[Deploy Job]
 F --> G[SSH into Oracle VM]
 G --> H[git pull origin main]
 H --> I[npm ci Backend]
-I --> J[npm ci && npm run build Frontend]
+I --> J[npm ci and npm run build Frontend]
 J --> K[pm2 reload portfolio-backend]
 K --> L[curl /health]
 L --> M[HTTP 200 OK]
 
-%% Observability flow
 K --> N[PM2 Logs]
-N --> N1[stdout / stderr logs]
+N --> N1[Application Logs]
 
-I --> O[Application Logging Layer]
-O --> O1[Structured API logs]
+I --> O[Structured API Logs]
+O --> O1[Request and Error Logs]
 
-G --> P[System Logs (/var/log)]
-P --> P1[auth.log / kern.log / dpkg.log / fail2ban.log]
+G --> P[System Logs]
+P --> P1[auth.log]
+P --> P2[kern.log]
+P --> P3[dpkg.log]
+P --> P4[fail2ban.log]
 
 N1 --> Q[Promtail Agent]
 O1 --> Q
 P1 --> Q
+P2 --> Q
+P3 --> Q
+P4 --> Q
 
 Q --> R[Grafana Loki]
 R --> S[Grafana Dashboards]
-
-
 ```
 
 ## 🚀 CI/CD Pipeline
